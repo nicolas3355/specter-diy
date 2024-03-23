@@ -8,4 +8,5 @@ __all__ = [
     "blindingkeys", # blinding keys for liquid wallets
     "compatibility", # compatibility layer that converts json/files to Specter format
     "bip85", # bip85 derivation of new mnemonics, xprvs etc
+    "shamir", # use shamir secret sharing to split mnemonic
 ]
