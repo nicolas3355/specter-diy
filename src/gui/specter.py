@@ -6,12 +6,23 @@ from .screens import (
     NewMnemonicScreen,
     RecoverMnemonicScreen,
     DevSettings,
+    NumericScreen,
 )
 import asyncio
 
 
 class SpecterGUI(AsyncGUI):
     """Specter-related GUI"""
+
+
+    async def show_numeric_screen(self, title, note):
+        """
+        Asks the user to write a numeric number
+        shows numeric screen
+        """
+        scr = NumericScreen(title, note)
+        await self.load_screen(scr)
+        return await scr.result()
 
     async def show_mnemonic(self, mnemonic: str):
         """

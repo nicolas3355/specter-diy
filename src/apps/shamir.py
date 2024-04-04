@@ -64,12 +64,23 @@ class App(BaseApp):
 
     button = "Secret Sharing (Shamir)"
     name = "Split"
+    # prefixes = [b"combine"]
+
+    # def can_process(self, stream):
+    #     prefix = self.get_prefix(stream)
+    #     Check if we can process data
+    #     if prefix == self.prefixes[0]:
+    #         return True
+
+    # async def process_host_command(self, stream, show_screen):
+    #    print(stream)
+
+
 
     async def menu(self, show_screen):
         buttons = [
             (None, "Shamir Secret Sharing"),
             (0, "Split"),
-            (1, "Combine")
         ]
 
         # wait for menu selection
@@ -164,10 +175,8 @@ class App(BaseApp):
 
             return True
         # other stuff
-        if menuitem == 2:
-            shares = shamir_crypto.Shamir.split(2, 3, self.keystore.mnemonic)
-            print(shares)
-            print(shamir_crypto.Shamir.combine(shares))
+        # if menuitem == 1:
+        #    shares = shamir_crypto.Shamir.split(2, 3, self.keystore.mnemonic)
         else:
             raise NotImplementedError("Not implemented")
         return True

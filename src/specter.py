@@ -15,9 +15,11 @@ from platform import (
 from hosts import Host, HostError
 from app import BaseApp
 from embit import bip39
+from embit import shamir_crypto
 from embit.liquid.networks import NETWORKS
 from gui.screens.settings import HostSettings
 from gui.screens.mnemonic import MnemonicPrompt
+from gui.screens.input import NumericScreen
 
 # small helper functions
 from helpers import gen_mnemonic, fix_mnemonic
@@ -195,6 +197,7 @@ class Specter:
             (0, "Generate new key"),
             (1, "Enter recovery phrase"),
             (777, "Import recovery phrase"),
+            (776, "Import shamir shares"),
         ]
         if self.keystore.is_key_saved and self.keystore.load_button:
             buttons.append((2, self.keystore.load_button))
@@ -226,6 +229,8 @@ class Specter:
             return self.mainmenu
         elif menuitem == 3:
             await self.update_devsettings()
+        elif menuitem == 776:
+            return await self.import_shares()
         elif menuitem == 777:
             return await self.import_mnemonic()
         # lock device
@@ -236,6 +241,34 @@ class Specter:
         else:
             print(menuitem, "menu is not implemented yet")
             raise SpecterError("Not implemented")
+
+    async def import_shares(self):
+        # create an empty list to save the shares
+        shares = []
+        # getting the total number of shamir secret shares
+        nb_shares = await self.gui.show_numeric_screen(title="Enter the number of shares", note="Default: 2")
+        while len(shares) < int(nb_shares):
+            host = await self.gui.menu(title="What to use for import?", note="\n",
+                buttons=[(host, host.button) for host in self.hosts if host.button],
+                last=(255, None))
+            if host == 255:
+                return
+            stream = await host.get_data()
+            if not stream:
+                return
+            data = stream.read().decode()
+            # getting the index of the share
+            index = await self.gui.show_numeric_screen(title="Enter Share Number", note="Default: " + str(len(shares) + 1))
+            if index is None or index == "":
+                index = len(shares) + 1
+            shares.append((index, data))
+        # combining shares into the original seed
+        mnemonic = shamir_crypto.Shamir.combine(shares)
+        scr = MnemonicPrompt(title="Imported mnemonic:", mnemonic=mnemonic)
+        # confirm mnemonic
+        if not await self.gui.show_screen()(scr):
+            return
+        return self.set_mnemonic(mnemonic, "")
 
     async def import_mnemonic(self):
         host = await self.gui.menu(title="What to use for import?", note="\n",
