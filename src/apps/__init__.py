@@ -9,4 +9,5 @@ __all__ = [
     "compatibility", # compatibility layer that converts json/files to Specter format
     "bip85", # bip85 derivation of new mnemonics, xprvs etc
     "shamir", # use shamir secret sharing to split mnemonic
+    "customderiv", # custom derivation
 ]
